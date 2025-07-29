@@ -34,14 +34,15 @@ router.get('/', auth, async (req, res) => {
 router.post('/', auth, async (req, res) => {
   try {
     console.log('Creating flashcard for user:', req.user.userId, req.body)
-    const { word, translation, definition } = req.body
-    if (!word || !translation || !definition) {
-      return res.status(400).json({ error: 'Word, translation, and definition are required' })
+    const { word, translation, definition, group } = req.body
+    if (!word || !translation || !definition || !group) {
+      return res.status(400).json({ error: 'Word, translation, definition, and group are required' })
     }
     const flashcard = new Flashcard({
       word,
       translation,
       definition,
+      group,
       userId: req.user.userId,
     })
     await flashcard.save()
@@ -71,9 +72,13 @@ router.delete('/:id', auth, async (req, res) => {
 router.put('/:id', auth, async (req, res) => {
   try {
     console.log('Updating flashcard:', req.params.id, req.body)
+    const { word, translation, definition, group } = req.body
+    if (!word || !translation || !definition || !group) {
+      return res.status(400).json({ error: 'Word, translation, definition, and group are required' })
+    }
     const flashcard = await Flashcard.findOneAndUpdate(
       { _id: req.params.id, userId: req.user.userId },
-      { $set: req.body },
+      { $set: { word, translation, definition, group } },
       { new: true }
     )
     if (!flashcard) {
@@ -86,4 +91,4 @@ router.put('/:id', auth, async (req, res) => {
   }
 })
 
-module.exports = router
+module.exports = router 
